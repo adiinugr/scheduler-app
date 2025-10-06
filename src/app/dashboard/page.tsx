@@ -53,12 +53,16 @@ export default function Dashboard() {
       if (response.ok) {
         const data = await response.json()
         // Convert date strings back to Date objects
-        const tasksWithDates = data.map((task: any) => ({
-          ...task,
-          date: new Date(task.date),
-          createdAt: new Date(task.createdAt),
-          updatedAt: new Date(task.updatedAt)
-        }))
+        const tasksWithDates = data.map(
+          (
+            task: Task & { date: string; createdAt: string; updatedAt: string }
+          ) => ({
+            ...task,
+            date: new Date(task.date),
+            createdAt: new Date(task.createdAt),
+            updatedAt: new Date(task.updatedAt)
+          })
+        )
         setTasks(tasksWithDates)
       } else {
         const errorData = await response.json()

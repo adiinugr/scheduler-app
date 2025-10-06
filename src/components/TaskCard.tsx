@@ -21,12 +21,12 @@ interface TaskCardProps {
   onEdit: (task: Task) => void
 }
 
-const priorityColors = {
-  low: "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30",
-  medium:
-    "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30",
-  high: "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30"
-}
+// const priorityColors = {
+//   low: "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30",
+//   medium:
+//     "text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30",
+//   high: "text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30"
+// }
 
 const hashtagColors = [
   "bg-blue-100 text-blue-900 border border-blue-200",

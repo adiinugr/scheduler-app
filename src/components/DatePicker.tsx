@@ -28,7 +28,7 @@ export default function DatePicker({
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  // const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
   // Get days from previous month to fill the grid
   const startDate = new Date(monthStart)
