@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TaskFlow - Beautiful Task Management App
 
-## Getting Started
+A modern, elegant task management application inspired by Todoist, Structured, and Tweek. Built with Next.js, TypeScript, Tailwind CSS, and Framer Motion.
 
-First, run the development server:
+## ✨ Features
+
+### Core Functionality
+
+- ✅ **Add Tasks** - Create tasks with title, description, date, and time
+- ✅ **Edit & Delete** - Full CRUD operations for task management
+- ✅ **Mark Complete** - Toggle task completion with smooth animations
+- ✅ **Date & Time** - Schedule tasks with specific dates and times
+- ✅ **Calendar View** - Beautiful date picker with month navigation
+
+### Organization & Productivity
+
+- 🏷️ **Hashtags** - Color-coded hashtags for task categorization
+- 🎯 **Priority Levels** - Low, medium, and high priority indicators
+- 🔍 **Search & Filter** - Find tasks by title, description, or hashtags
+- 📊 **Task Stats** - Overview of completion rates and task counts
+- 📅 **Smart Filtering** - Filter by today, upcoming, completed, or all tasks
+
+### Design & Experience
+
+- 🎨 **Modern UI** - Clean, minimalist design with glass morphism effects
+- 🌈 **Beautiful Animations** - Smooth transitions and micro-interactions
+- 🌙 **Dark Mode** - Full dark/light theme support
+- 📱 **Responsive** - Works perfectly on desktop, tablet, and mobile
+- 🎭 **Icons** - Emoji icons for visual task identification
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <your-repo-url>
+cd scheduler
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Date Handling**: date-fns
+- **Fonts**: Geist Sans & Geist Mono
 
-## Learn More
+## 📁 Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── dashboard/          # Main dashboard page
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Home page (redirects to dashboard)
+├── components/
+│   ├── TaskCard.tsx        # Individual task display
+│   ├── TaskForm.tsx        # Task creation/editing modal
+│   ├── DatePicker.tsx      # Calendar component
+│   ├── HashtagFilter.tsx   # Hashtag filtering
+│   ├── TaskStats.tsx       # Task statistics
+│   ├── EmptyState.tsx      # Empty state component
+│   └── LoadingSpinner.tsx  # Loading animation
+└── types/
+    └── task.ts             # TypeScript type definitions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🎨 Design Philosophy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+TaskFlow combines the best elements from popular task management apps:
 
-## Deploy on Vercel
+- **Todoist's** clean interface and powerful filtering
+- **Structured's** beautiful calendar integration
+- **Tweek's** modern design and smooth animations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app focuses on:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Simplicity** - Intuitive interface that doesn't overwhelm
+- **Beauty** - Every interaction is carefully crafted
+- **Efficiency** - Quick task creation and management
+- **Flexibility** - Multiple ways to organize and view tasks
+
+## 🔮 Future Enhancements
+
+- [ ] Database persistence (currently uses local state)
+- [ ] User authentication and multi-user support
+- [ ] Task templates and recurring tasks
+- [ ] Team collaboration features
+- [ ] Mobile app (React Native)
+- [ ] Advanced analytics and reporting
+- [ ] Integration with external calendars
+- [ ] Voice input for task creation
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License.
