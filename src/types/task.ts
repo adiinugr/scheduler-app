@@ -28,4 +28,5 @@ export interface TaskFormData {
   icon: string
   hashtags: string[]
   priority: "low" | "medium" | "high"
+  completed: boolean
 }

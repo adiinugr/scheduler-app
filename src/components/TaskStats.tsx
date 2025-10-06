@@ -8,7 +8,6 @@ import {
   Calendar,
   TrendingUp,
   Target,
-  AlertTriangle,
   ArrowDown,
   ArrowUp,
   Minus
@@ -106,7 +105,7 @@ export default function TaskStats({ tasks }: TaskStatsProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className={`p-4 rounded-lg border ${item.bgColor} ${item.borderColor} hover:shadow-sm transition-all duration-200`}
+            className={`p-4 rounded-lg border ${item.bgColor} ${item.borderColor} hover:shadow-sm transition-all duration-200 `}
           >
             <div className="flex items-center justify-between mb-2">
               <div
@@ -118,7 +117,7 @@ export default function TaskStats({ tasks }: TaskStatsProps) {
                 {item.value}
               </span>
             </div>
-            <p className="text-small text-gray-600">{item.label}</p>
+            <p className="text-sm text-gray-600">{item.label}</p>
           </motion.div>
         ))}
       </div>

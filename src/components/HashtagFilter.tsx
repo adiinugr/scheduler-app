@@ -97,7 +97,7 @@ export default function HashtagFilter({
         {selectedHashtags.length > 0 && (
           <button
             onClick={clearAllHashtags}
-            className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           >
             Clear all
           </button>
@@ -115,7 +115,7 @@ export default function HashtagFilter({
               whileTap={{ scale: 0.98 }}
               onClick={() => toggleHashtag(hashtag.name)}
               className={clsx(
-                "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                "w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer",
                 isSelected
                   ? getHashtagColor(index)
                   : "text-gray-600 hover:bg-gray-100"

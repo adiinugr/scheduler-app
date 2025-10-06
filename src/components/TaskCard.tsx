@@ -2,7 +2,15 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle, Circle, Flag, MoreVertical } from "lucide-react"
+import {
+  CheckCircle,
+  Circle,
+  Flag,
+  MoreVertical,
+  ArrowUp,
+  ArrowDown,
+  Minus
+} from "lucide-react"
 import { Task } from "@/types/task"
 import clsx from "clsx"
 
@@ -21,12 +29,12 @@ const priorityColors = {
 }
 
 const hashtagColors = [
-  "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-  "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300",
-  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-  "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
+  "bg-blue-100 text-blue-900 border border-blue-200",
+  "bg-purple-100 text-purple-900 border border-purple-200",
+  "bg-pink-100 text-pink-900 border border-pink-200",
+  "bg-green-100 text-green-900 border border-green-200",
+  "bg-orange-100 text-orange-900 border border-orange-200",
+  "bg-indigo-100 text-indigo-900 border border-indigo-200"
 ]
 
 export default function TaskCard({
@@ -84,12 +92,12 @@ export default function TaskCard({
             onClick={handleToggleComplete}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex-shrink-0 p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200 mt-0.5"
+            className="flex-shrink-0 p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200 mt-0.5 cursor-pointer"
           >
             {task.completed ? (
               <CheckCircle className="w-5 h-5 text-green-500" />
             ) : (
-              <Circle className="w-5 h-5 text-gray-300 hover:text-gray-400" />
+              <Circle className="w-5 h-5 text-gray-500 hover:text-gray-600" />
             )}
           </motion.button>
 
@@ -125,9 +133,9 @@ export default function TaskCard({
             onClick={() => setShowActions(!showActions)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+            className="p-1 hover:bg-gray-100 rounded-lg transition-colors duration-200 cursor-pointer"
           >
-            <MoreVertical className="w-4 h-4 text-gray-500" />
+            <MoreVertical className="w-4 h-4 text-gray-700" />
           </motion.button>
 
           {/* Dropdown Menu */}
@@ -142,13 +150,13 @@ export default function TaskCard({
               >
                 <button
                   onClick={handleEdit}
-                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  className="w-full px-3 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 flex items-center gap-2 cursor-pointer"
                 >
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  className="w-full px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 flex items-center gap-2 cursor-pointer"
                 >
                   <span>Delete</span>
                 </button>
@@ -161,6 +169,48 @@ export default function TaskCard({
       {/* Description */}
       {task.description && (
         <p className="text-body line-clamp-2 ml-11">{task.description}</p>
+      )}
+
+      {/* Hashtags */}
+      {task.hashtags && task.hashtags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-3 ml-11">
+          {task.hashtags.map((hashtag, index) => (
+            <span
+              key={index}
+              className={`px-2 py-1 text-xs rounded-full ${
+                hashtagColors[index % hashtagColors.length]
+              }`}
+            >
+              #{hashtag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Priority Icon */}
+      {task.priority && (
+        <div className="mt-3 ml-11">
+          <div className="flex items-center gap-2">
+            {task.priority === "high" && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full border border-red-200">
+                <ArrowUp className="w-3 h-3" />
+                <span className="text-xs font-medium">High</span>
+              </div>
+            )}
+            {task.priority === "low" && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full border border-green-200">
+                <ArrowDown className="w-3 h-3" />
+                <span className="text-xs font-medium">Low</span>
+              </div>
+            )}
+            {task.priority === "medium" && (
+              <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full border border-blue-200">
+                <Minus className="w-3 h-3" />
+                <span className="text-xs font-medium">Medium</span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </motion.div>
   )

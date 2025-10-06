@@ -55,4 +55,16 @@ body {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  .text-section-header {
+    @apply text-gray-900 font-semibold text-lg;
+  }
+
+  .text-card-title {
+    @apply text-gray-900 font-semibold text-base leading-tight;
+  }
+
+  .text-body {
+    @apply text-gray-700 text-sm leading-relaxed;
+  }
 }

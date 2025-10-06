@@ -7,9 +7,7 @@ import {
   Calendar,
   Clock,
   Tag,
-  Star,
   Plus,
-  AlertTriangle,
   Minus,
   ArrowDown,
   ArrowUp
@@ -22,6 +20,7 @@ interface TaskFormProps {
   onSubmit: (task: Omit<TaskFormData, "id" | "createdAt" | "updatedAt">) => void
   initialDate?: Date
   initialData?: Task
+  isLoading?: boolean
 }
 
 const icons = [
@@ -99,7 +98,8 @@ export default function TaskForm({
   onClose,
   onSubmit,
   initialDate = new Date(),
-  initialData
+  initialData,
+  isLoading = false
 }: TaskFormProps) {
   const [formData, setFormData] = useState<TaskFormData>({
     title: initialData?.title || "",
@@ -108,7 +108,11 @@ export default function TaskForm({
     time: initialData?.time || "",
     icon: initialData?.icon || "",
     hashtags: initialData?.hashtags || [],
-    priority: initialData?.priority || "medium"
+    priority: (initialData?.priority || "medium").toLowerCase() as
+      | "low"
+      | "medium"
+      | "high",
+    completed: initialData?.completed || false
   })
 
   const [newHashtag, setNewHashtag] = useState("")
@@ -173,7 +177,7 @@ export default function TaskForm({
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -193,7 +197,7 @@ export default function TaskForm({
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, title: e.target.value }))
                   }
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 placeholder-gray-500 focus:outline-none"
                   placeholder="What needs to be done?"
                   required
                 />
@@ -212,7 +216,7 @@ export default function TaskForm({
                       description: e.target.value
                     }))
                   }
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none text-gray-900 placeholder-gray-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 resize-none text-gray-900 placeholder-gray-500 focus:outline-none"
                   rows={3}
                   placeholder="Add more details about this task..."
                 />
@@ -234,7 +238,7 @@ export default function TaskForm({
                         date: new Date(e.target.value)
                       }))
                     }
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -248,7 +252,7 @@ export default function TaskForm({
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, time: e.target.value }))
                     }
-                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 focus:outline-none"
                   />
                 </div>
               </div>
@@ -271,7 +275,7 @@ export default function TaskForm({
                   <button
                     type="button"
                     onClick={() => setShowIconPicker(!showIconPicker)}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 font-medium"
+                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 font-medium cursor-pointer"
                   >
                     {formData.icon ? "Change Icon" : "Choose Icon"}
                   </button>
@@ -283,7 +287,7 @@ export default function TaskForm({
                       onClick={() =>
                         setFormData((prev) => ({ ...prev, icon: "" }))
                       }
-                      className="px-3 py-2 text-gray-500 hover:text-red-600 transition-colors"
+                      className="px-3 py-2 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                     >
                       Remove
                     </button>
@@ -308,7 +312,7 @@ export default function TaskForm({
                               setFormData((prev) => ({ ...prev, icon }))
                               setShowIconPicker(false)
                             }}
-                            className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center text-xl transition-all duration-200 ${
+                            className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center text-xl transition-all duration-200 cursor-pointer ${
                               formData.icon === icon
                                 ? "border-orange-500 bg-orange-50"
                                 : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
@@ -343,7 +347,7 @@ export default function TaskForm({
                             priority: option.value
                           }))
                         }
-                        className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                        className={`p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer ${
                           isSelected
                             ? `${option.bgColor} ${option.borderColor} border-opacity-100`
                             : "bg-white border-gray-200 hover:border-gray-300"
@@ -408,13 +412,13 @@ export default function TaskForm({
                     onKeyPress={(e) =>
                       e.key === "Enter" && (e.preventDefault(), addHashtag())
                     }
-                    className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 text-gray-900 placeholder-gray-500 focus:outline-none"
                     placeholder="Add a tag..."
                   />
                   <button
                     type="button"
                     onClick={addHashtag}
-                    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-200 transition-colors flex items-center gap-2"
+                    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-200 transition-colors flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     Add
@@ -427,7 +431,8 @@ export default function TaskForm({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-3 text-gray-600 hover:text-gray-800 transition-colors font-medium"
+                  disabled={isLoading}
+                  className="px-6 py-3 text-gray-600 hover:text-gray-800 transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -435,9 +440,19 @@ export default function TaskForm({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                  disabled={isLoading}
+                  className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {initialData ? "Update Task" : "Create Task"}
+                  {isLoading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {initialData ? "Updating..." : "Creating..."}
+                    </div>
+                  ) : initialData ? (
+                    "Update Task"
+                  ) : (
+                    "Create Task"
+                  )}
                 </motion.button>
               </div>
             </form>

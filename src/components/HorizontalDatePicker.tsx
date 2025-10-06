@@ -126,19 +126,19 @@ export default function HorizontalDatePicker({
         <div className="flex items-center gap-2">
           <button
             onClick={goToPreviousWeek}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={goToToday}
-            className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+            className="px-3 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium cursor-pointer"
           >
             Today
           </button>
           <button
             onClick={goToNextWeek}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -174,7 +174,7 @@ export default function HorizontalDatePicker({
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onDateChange(date)}
                 className={clsx(
-                  "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all duration-200 w-full min-h-[80px]",
+                  "flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all duration-200 w-full min-h-[80px] cursor-pointer",
                   isSelected
                     ? "border-orange-500 bg-orange-50 shadow-md"
                     : isTodayDate
@@ -238,7 +238,7 @@ export default function HorizontalDatePicker({
             <Clock className="w-4 h-4 text-gray-500" />
             <div>
               <span className="text-sm text-gray-600">Selected Date:</span>
-              <span className="ml-2 font-medium text-gray-900">
+              <span className="ml-2 text-sm font-medium text-gray-900">
                 {format(selectedDate, "EEEE, MMMM d, yyyy")}
               </span>
             </div>

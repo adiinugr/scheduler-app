@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Calendar, Filter, Search, Settings } from "lucide-react"
+import { Plus, Calendar, Search, Settings, LogOut } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Task, TaskFilter } from "@/types/task"
 import TaskCard from "@/components/TaskCard"
 import TaskForm from "@/components/TaskForm"
@@ -12,11 +14,15 @@ import EmptyState from "@/components/EmptyState"
 import TaskStats from "@/components/TaskStats"
 
 // Create stable dates to prevent hydration mismatches
-const createStableDate = (timestamp: number) => new Date(timestamp)
 
 export default function Dashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [tasks, setTasks] = useState<Task[]>([])
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [filter, setFilter] = useState<TaskFilter>("all")
   const [dateFilter, setDateFilter] = useState<Date | null>(null)
@@ -25,67 +31,46 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedHashtags, setSelectedHashtags] = useState<string[]>([])
 
-  // Initialize tasks on client side only to prevent hydration mismatch
+  // Redirect if not authenticated
   useEffect(() => {
-    if (!isInitialized) {
-      const baseTime = Date.now()
-      setTasks([
-        {
-          id: "1",
-          title: "Design new landing page",
-          description:
-            "Create a modern, responsive landing page for the new product launch",
-          date: createStableDate(baseTime),
-          time: "10:00",
-          completed: false,
-          icon: "🎨",
-          hashtags: ["work", "design", "urgent"],
-          priority: "high",
-          createdAt: createStableDate(baseTime),
-          updatedAt: createStableDate(baseTime)
-        },
-        {
-          id: "2",
-          title: "Grocery shopping",
-          description: "Buy ingredients for weekend dinner party",
-          date: createStableDate(baseTime + 24 * 60 * 60 * 1000),
-          time: "14:30",
-          completed: false,
-          icon: "🛒",
-          hashtags: ["personal", "shopping"],
-          priority: "medium",
-          createdAt: createStableDate(baseTime),
-          updatedAt: createStableDate(baseTime)
-        },
-        {
-          id: "3",
-          title: "Team meeting",
-          description: "Weekly standup with the development team",
-          date: createStableDate(baseTime),
-          time: "09:00",
-          completed: true,
-          icon: "💼",
-          hashtags: ["work", "meeting"],
-          priority: "medium",
-          createdAt: createStableDate(baseTime),
-          updatedAt: createStableDate(baseTime)
-        },
-        {
-          id: "4",
-          title: "Read new book",
-          description: 'Continue reading "Atomic Habits" - aim for 30 pages',
-          date: createStableDate(baseTime + 2 * 24 * 60 * 60 * 1000),
-          completed: false,
-          icon: "📚",
-          hashtags: ["personal", "learning"],
-          priority: "low",
-          createdAt: createStableDate(baseTime),
-          updatedAt: createStableDate(baseTime)
-        }
-      ])
-      setIsInitialized(true)
+    if (status === "unauthenticated") {
+      router.push("/login")
     }
-  }, [isInitialized])
+  }, [status, router])
+
+  // Fetch tasks from API
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetchTasks()
+    }
+  }, [status])
+
+  const fetchTasks = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const response = await fetch("/api/tasks")
+      if (response.ok) {
+        const data = await response.json()
+        // Convert date strings back to Date objects
+        const tasksWithDates = data.map((task: any) => ({
+          ...task,
+          date: new Date(task.date),
+          createdAt: new Date(task.createdAt),
+          updatedAt: new Date(task.updatedAt)
+        }))
+        setTasks(tasksWithDates)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to fetch tasks")
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error)
+      setError("Failed to connect to server")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const [today, setToday] = useState<Date | null>(null)
 
@@ -128,42 +113,158 @@ export default function Dashboard() {
     )
   })
 
-  const addTask = (taskData: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
-    const now = Date.now()
-    const newTask: Task = {
-      ...taskData,
-      id: now.toString(),
-      createdAt: createStableDate(now),
-      updatedAt: createStableDate(now)
+  const addTask = async (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
+    try {
+      setIsSubmitting(true)
+      setError(null)
+      const response = await fetch("/api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: taskData.title,
+          description: taskData.description,
+          date: taskData.date.toISOString(),
+          time: taskData.time,
+          icon: taskData.icon,
+          hashtags: taskData.hashtags,
+          priority: taskData.priority
+        })
+      })
+
+      if (response.ok) {
+        const newTask = await response.json()
+        // Convert date strings back to Date objects
+        const taskWithDates = {
+          ...newTask,
+          date: new Date(newTask.date),
+          createdAt: new Date(newTask.createdAt),
+          updatedAt: new Date(newTask.updatedAt)
+        }
+        setTasks((prev) => [...prev, taskWithDates])
+        setShowTaskForm(false)
+        setSuccess("Task created successfully!")
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to create task")
+      }
+    } catch (error) {
+      console.error("Error creating task:", error)
+      setError("Failed to connect to server")
+    } finally {
+      setIsSubmitting(false)
     }
-    setTasks((prev) => [...prev, newTask])
   }
 
-  const editTask = (taskData: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
+  const editTask = async (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
     if (!editingTask) return
 
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === editingTask.id
-          ? { ...task, ...taskData, updatedAt: createStableDate(Date.now()) }
-          : task
-      )
-    )
-    setEditingTask(null)
+    try {
+      setIsSubmitting(true)
+      setError(null)
+      const response = await fetch(`/api/tasks/${editingTask.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: taskData.title,
+          description: taskData.description,
+          date: taskData.date.toISOString(),
+          time: taskData.time,
+          icon: taskData.icon,
+          hashtags: taskData.hashtags,
+          priority: taskData.priority
+        })
+      })
+
+      if (response.ok) {
+        const updatedTask = await response.json()
+        // Convert date strings back to Date objects
+        const taskWithDates = {
+          ...updatedTask,
+          date: new Date(updatedTask.date),
+          createdAt: new Date(updatedTask.createdAt),
+          updatedAt: new Date(updatedTask.updatedAt)
+        }
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === editingTask.id ? taskWithDates : task
+          )
+        )
+        setEditingTask(null)
+        setSuccess("Task updated successfully!")
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to update task")
+      }
+    } catch (error) {
+      console.error("Error updating task:", error)
+      setError("Failed to connect to server")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id
-          ? { ...task, ...updates, updatedAt: createStableDate(Date.now()) }
-          : task
-      )
-    )
+  const updateTask = async (id: string, updates: Partial<Task>) => {
+    try {
+      setError(null)
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updates)
+      })
+
+      if (response.ok) {
+        const updatedTask = await response.json()
+        // Convert date strings back to Date objects
+        const taskWithDates = {
+          ...updatedTask,
+          date: new Date(updatedTask.date),
+          createdAt: new Date(updatedTask.createdAt),
+          updatedAt: new Date(updatedTask.updatedAt)
+        }
+        setTasks((prev) =>
+          prev.map((task) => (task.id === id ? taskWithDates : task))
+        )
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to update task")
+      }
+    } catch (error) {
+      console.error("Error updating task:", error)
+      setError("Failed to connect to server")
+    }
   }
 
-  const deleteTask = (id: string) => {
-    setTasks((prev) => prev.filter((task) => task.id !== id))
+  const deleteTask = async (id: string) => {
+    try {
+      setError(null)
+      const response = await fetch(`/api/tasks/${id}`, {
+        method: "DELETE"
+      })
+
+      if (response.ok) {
+        setTasks((prev) => prev.filter((task) => task.id !== id))
+        setSuccess("Task deleted successfully!")
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || "Failed to delete task")
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error)
+      setError("Failed to connect to server")
+    }
   }
 
   const handleDateSelect = (date: Date) => {
@@ -173,8 +274,19 @@ export default function Dashboard() {
     setFilter("all")
   }
 
-  const clearDateFilter = () => {
-    setDateFilter(null)
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === "unauthenticated") {
+    return null // Will redirect via useEffect
   }
 
   return (
@@ -201,8 +313,18 @@ export default function Dashboard() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors">
+              <span className="text-sm text-gray-600">
+                Welcome, {session?.user?.name || session?.user?.email}
+              </span>
+              <button className="p-2 text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
                 <Settings className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="p-2 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+                title="Sign out"
+              >
+                <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -210,6 +332,36 @@ export default function Dashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span>{error}</span>
+              <button
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-600 cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Success Display */}
+        {success && (
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span>{success}</span>
+              <button
+                onClick={() => setSuccess(null)}
+                className="text-green-400 hover:text-green-600 cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
@@ -237,7 +389,7 @@ export default function Dashboard() {
                         setFilter(filterOption)
                         setDateFilter(null)
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                         isActive || shouldHighlightToday
                           ? "bg-orange-100 text-orange-700"
                           : "text-gray-600 hover:bg-gray-100"
@@ -285,7 +437,7 @@ export default function Dashboard() {
                       placeholder="Search tasks..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-64 pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm"
+                      className="w-64 pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-sm placeholder:text-gray-400"
                     />
                   </div>
                 </div>
@@ -353,6 +505,7 @@ export default function Dashboard() {
             onClose={() => setShowTaskForm(false)}
             onSubmit={addTask}
             initialDate={selectedDate}
+            isLoading={isSubmitting}
           />
         )}
       </AnimatePresence>
@@ -365,6 +518,7 @@ export default function Dashboard() {
             onSubmit={editTask}
             initialDate={editingTask.date}
             initialData={editingTask}
+            isLoading={isSubmitting}
           />
         )}
       </AnimatePresence>
@@ -374,7 +528,7 @@ export default function Dashboard() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setShowTaskForm(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-orange-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 hover:bg-orange-600"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-orange-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-50 hover:bg-orange-600 cursor-pointer"
       >
         <Plus className="w-6 h-6" />
       </motion.button>

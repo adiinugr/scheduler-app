@@ -50,7 +50,7 @@ export default function EmptyState({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
-        className="text-body mb-8 max-w-md mx-auto"
+        className="text-body mb-8 max-w-md mx-auto text-gray-400"
       >
         {description}
       </motion.p>
@@ -70,7 +70,7 @@ export default function EmptyState({
             transition: { duration: 0.1 }
           }}
           onClick={onAction}
-          className="inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200 shadow-sm hover:shadow-md"
+          className="inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors duration-200 shadow-sm hover:shadow-md cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>{actionText}</span>
